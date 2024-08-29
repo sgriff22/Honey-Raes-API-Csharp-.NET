@@ -267,4 +267,52 @@ app.MapDelete("servicetickets/{id}", (int id) =>
     return Results.NoContent();
 });
 
+app.MapPut("/servicetickets/{id}", (int id, ServiceTicket serviceTicket) =>
+{
+    //Get service ticket object by id
+    ServiceTicket ticketToUpdate = serviceTickets.FirstOrDefault(st => st.Id == id);
+
+    //Check to see if the result is null
+    if (ticketToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+    //check to see if service ticket id even exists
+    if (id != serviceTicket.Id)
+    {
+        return Results.BadRequest();
+    }
+
+    //reassign the values to the service ticket sent in request body
+    ticketToUpdate.CustomerId = serviceTicket.CustomerId;
+    ticketToUpdate.EmployeeId = serviceTicket.EmployeeId;
+    ticketToUpdate.Description = serviceTicket.Description;
+    ticketToUpdate.Emergency = serviceTicket.Emergency;
+    ticketToUpdate.DateCompleted = serviceTicket.DateCompleted;
+
+    //Return a response code to notify it was a success
+    return Results.NoContent();
+});
+
+//Mark a ticket as complete
+app.MapPost("/servicetickets/{id}/complete", (int id) =>
+{
+    ServiceTicket ticketToComplete = serviceTickets.FirstOrDefault(st => st.Id == id);
+    //Check to see if the result is null
+    if (ticketToComplete  == null)
+    {
+        return Results.NotFound();
+    }
+
+    // Check if the ticket is already completed
+    if (ticketToComplete.DateCompleted.HasValue)
+    {
+        return Results.BadRequest("Ticket is already completed.");
+    }
+
+    ticketToComplete.DateCompleted = DateTime.Today;
+    
+    return Results.NoContent();
+});
+
 app.Run();
